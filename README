@@ -1,2 +1,12 @@
 This is the pong project for SigART
-A new line.
+
+SVN Commands:
+svn stat: checks for any modifications to the repository.
+
+svn up: checks for changes and update files locally.
+
+svn add: adds an unversioned file to the repository.
+
+svn commit: send local changes to the remote repository.
+
+svn checkout: Run once at the beginning to get the repository on your local machine.
