@@ -17,4 +17,10 @@ public class Vector {
         this.x = (double)x;
         this.y = (double)y;
     }
+
+    public void unitize() {
+        double length = Math.sqrt(x * x + y * y);
+        x /= length;
+        y /= length;
+    }
 }
