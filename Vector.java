@@ -8,12 +8,12 @@ public class Vector {
         y = 0;
     }
 
-    public Vector(double x, double y, double magnitude){
+    public Vector(double x, double y){
         this.x = x;
         this.y = y;
     }
 
-    public Vector(int x, int y, int magnitude){
+    public Vector(int x, int y){
         this.x = (double)x;
         this.y = (double)y;
     }
