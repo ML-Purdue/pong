@@ -3,9 +3,11 @@ import java.awt.Point;
 public class Ball {
     Point location;
     Vector direction;
-    final double speed;
+    double speed;
 
-    public Ball(){
-        speed = 1;
+    public Ball(Point location, Vector direction, double speed){
+        this.location = location;
+        this.direction = direction;
+        this.speed = speed;
     }
 }
