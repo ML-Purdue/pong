@@ -6,22 +6,22 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class ControlState implements KeyListener {
-	public HashMap<ControlsEnumeration, Key> controls;
+	public HashMap<Controls, Key> controls;
 	// used to ignore repeated key presses a while key is held down
 	private Key possiblyReleasedKey;
 	
 	public ControlState() {
-		controls = new HashMap<ControlsEnumeration, Key>();
+		controls = new HashMap<Controls, Key>();
 		// key is assigned when a key is released
 		possiblyReleasedKey = null;
 	}
 	
-	public void addControl(ControlsEnumeration control, int keyCode) {
+	public void addControl(Controls control, int keyCode) {
 		// prevent duplicate controls to avoid the situation in which
 		// two different keys activate or deactivate the same control
 		Iterator iterator = controls.entrySet().iterator();
 	    while (iterator.hasNext()) {
-	        Map.Entry<ControlsEnumeration, Key> pairs = (Map.Entry<ControlsEnumeration, Key>)iterator.next();
+	        Map.Entry<Controls, Key> pairs = (Map.Entry<Controls, Key>)iterator.next();
 	        if (pairs.getKey() == control) {
 	        	throw new IllegalArgumentException("Duplicate control " + control.toString());
 	        }
@@ -40,7 +40,6 @@ public class ControlState implements KeyListener {
 		// find the control corresponding to the key pressed
 		for (Key key : controls.values()) {
 	        if (key.keyCode == e.getKeyCode()) {
-	        	if (!key.isPressed) { System.out.println(KeyEvent.getKeyText(e.getKeyCode()) + " Pressed."); }
 	        	key.isPressed = true;
 		        
 		        // the key has not been released
@@ -55,7 +54,7 @@ public class ControlState implements KeyListener {
 		// find the control corresponding to the key released
 		Iterator iterator = controls.entrySet().iterator();
 	    while (iterator.hasNext()) {
-	        Map.Entry<ControlsEnumeration, Key> pairs = (Map.Entry<ControlsEnumeration, Key>)iterator.next();
+	        Map.Entry<Controls, Key> pairs = (Map.Entry<Controls, Key>)iterator.next();
 	        if (pairs.getValue().keyCode == e.getKeyCode()) {
 				// the key might not have actually been released because this
 				// event could have been caused by auto-repeat

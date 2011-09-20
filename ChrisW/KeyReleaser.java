@@ -19,7 +19,6 @@ public class KeyReleaser implements Runnable {
 		
 		// if the key still appears released, it most likely is
 		// if the key no longer appears released, it is pressed
-    	if (key.appearsReleased) { System.out.println(KeyEvent.getKeyText(key.keyCode) + " Released."); }
-		key.isPressed = !key.appearsReleased;
+    	key.isPressed = !key.appearsReleased;
 	}
 }
