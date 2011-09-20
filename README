@@ -7,7 +7,7 @@ To clean the respository:
 $ make clean
 
 Check the wiki or google docs document for up-to-date information about this project.
-
+ 
 SVN Commands:
 svn stat: checks for any modifications to the repository.
 
