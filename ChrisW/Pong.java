@@ -56,7 +56,7 @@ public class Pong extends Thread implements MouseMotionListener {
 		return config.createCompatibleImage(width, height, (alpha) ? Transparency.TRANSLUCENT : Transparency.OPAQUE);
 	}
 
-	public Pong() {
+	private void setupGraphics(){
 		//Set up the JFrame
 		frame = new JFrame();
 		frame.addWindowListener(new FrameClose());
@@ -77,10 +77,35 @@ public class Pong extends Thread implements MouseMotionListener {
 			strategy = canvas.getBufferStrategy();
 		} while(strategy == null);
 
+	}
+
+	public Pong() {
+		setupGraphics();
+
 		random = new Random();
 		controls = new ControlState();
-		paddle = new HumanPaddle(controls, PADDLE_LENGTH);
 		ball = new Ball(BALL_SPEED, BALL_RADIUS);
+		paddle = new SimpleCPUPaddle(ball, PADDLE_LENGTH);
+		tickTime = (long)(1.0 / 30 * 1000);
+		canvas.addKeyListener(controls);
+		frame.addKeyListener(controls);
+		canvas.addMouseMotionListener(this);
+		controls.addControl(Controls.exit, KeyEvent.VK_ESCAPE);
+		controls.addControl(Controls.movePaddleUp, KeyEvent.VK_UP);
+		controls.addControl(Controls.movePaddleDown, 
+				KeyEvent.VK_DOWN);
+		
+		isRunning = true;
+		respawn(ball);
+		start();
+	}
+
+	public Pong(Paddle paddle){
+		setupGraphics();
+
+		random = new Random();
+		controls = new ControlState();
+        this.paddle = paddle;
 		tickTime = (long)(1.0 / 30 * 1000);
 		canvas.addKeyListener(controls);
 		frame.addKeyListener(controls);
@@ -182,7 +207,7 @@ public class Pong extends Thread implements MouseMotionListener {
 			do{
 				Graphics2D bg = getBuffer();
 				if(!isRunning){
-					break;
+					System.exit(0);
 				}
 				renderGame(backgroundGraphics);
 				bg.drawImage(background, 0, 0, null);
