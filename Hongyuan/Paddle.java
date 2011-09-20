@@ -1,7 +1,7 @@
 /*
  * I still have some questions about the paddle class. So there may be some errors in my program.
  * Could you guys email me at wanghongyuan05@gmail.com, 
- * if the paddle class doesn't colaborate with the classed you are working on? 
+ * if the paddle class doesn't colaborate with the classes you are working on? 
  */ 
 public class Paddle {
     double yPosition;
