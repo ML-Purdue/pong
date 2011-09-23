@@ -38,16 +38,21 @@ public class Pong extends Thread implements MouseMotionListener {
 	//Functionality members
 	Random random;
 	ControlState controls;
-	Paddle paddle;
+	Paddle lPaddle;
+	Paddle rPaddle;
 	Ball ball;
 	final int PADDLE_SPEED = 100;
 	final int PADDLE_LENGTH = 20;
-	final int ARENA_WIDTH = 100;
-	final int ARENA_HEIGHT = 100;
+	final int ARENA_WIDTH = 200;
+	final int ARENA_HEIGHT = 200;
 	final int BALL_RADIUS = 1;
-	final int BALL_SPEED = 150;
-	int bounces;
-	int misses;
+	final int BALL_SPEED = 200;
+	int lBounces;
+	int lStreak;
+	int lMisses;
+	int rBounces;
+	int rStreak;
+	int rMisses;
 	long tickTime;
 	boolean isRunning;
 	Point lastMousePosition;
@@ -82,38 +87,50 @@ public class Pong extends Thread implements MouseMotionListener {
 	public Pong() {
 		setupGraphics();
 
+		ball = new Ball(BALL_SPEED, BALL_RADIUS);
+		lPaddle = new SimpleCPUPaddle(ball, PADDLE_LENGTH, 10, ARENA_HEIGHT);
+		rPaddle = new SimpleCPUPaddle(ball, PADDLE_LENGTH, ARENA_WIDTH-10, ARENA_HEIGHT);
+
 		random = new Random();
 		controls = new ControlState();
-		ball = new Ball(BALL_SPEED, BALL_RADIUS);
-		paddle = new SimpleCPUPaddle(ball, PADDLE_LENGTH);
-		tickTime = (long)(1.0 / 30 * 1000);
-		canvas.addKeyListener(controls);
-		frame.addKeyListener(controls);
-		canvas.addMouseMotionListener(this);
 		controls.addControl(Controls.exit, KeyEvent.VK_ESCAPE);
 		controls.addControl(Controls.movePaddleUp, KeyEvent.VK_UP);
-		controls.addControl(Controls.movePaddleDown, 
-				KeyEvent.VK_DOWN);
+		controls.addControl(Controls.movePaddleDown, KeyEvent.VK_DOWN);
+
+		tickTime = (long)(1.0 / 30 * 1000);
+
+		//Allow key presses to work both if the frame and canvas are in focus
+		canvas.addKeyListener(controls);
+		frame.addKeyListener(controls);
+
+		canvas.addMouseMotionListener(this);
 		
 		isRunning = true;
 		respawn(ball);
 		start();
 	}
 
-	public Pong(Paddle paddle){
+	public Pong(Paddle left, Paddle right){
 		setupGraphics();
+
+		ball = new Ball(BALL_SPEED, BALL_RADIUS);
+		rPaddle = right;
+		lPaddle = left;
 
 		random = new Random();
 		controls = new ControlState();
-        this.paddle = paddle;
-		tickTime = (long)(1.0 / 30 * 1000);
-		canvas.addKeyListener(controls);
-		frame.addKeyListener(controls);
-		canvas.addMouseMotionListener(this);
 		controls.addControl(Controls.exit, KeyEvent.VK_ESCAPE);
 		controls.addControl(Controls.movePaddleUp, KeyEvent.VK_UP);
-		controls.addControl(Controls.movePaddleDown, 
-				KeyEvent.VK_DOWN);
+		controls.addControl(Controls.movePaddleDown, KeyEvent.VK_DOWN);
+
+		//limit speed to 30 fps
+		tickTime = (long)(1.0 / 30 * 1000);
+
+		//Allow key presses to work both if the frame and canvas are in focus
+		canvas.addKeyListener(controls);
+		frame.addKeyListener(controls);
+
+		canvas.addMouseMotionListener(this);
 		
 		isRunning = true;
 		respawn(ball);
@@ -136,12 +153,13 @@ public class Pong extends Thread implements MouseMotionListener {
 	}
 
 	private boolean updateScreen() {
+		//Push the buffer to the screen
 		graphics.dispose();
 		graphics = null;
 		try{
 			strategy.show();
 			Toolkit.getDefaultToolkit().sync();
-			return !strategy.contentsLost();
+			return !strategy.contentsLost();//return if we indeed pushed the buffer to the screen
 		} catch(NullPointerException e){ return true;
 		} catch(IllegalStateException e){ return true;
 		}
@@ -160,10 +178,16 @@ public class Pong extends Thread implements MouseMotionListener {
 			}
 			
 			//Get the paddle's move
-			switch (paddle.getMove()) {
-				case up: paddle.yPosition -= PADDLE_SPEED * (tickTime / 1000.0);
+			switch (rPaddle.getMove()) {
+				case up: rPaddle.yPosition -= PADDLE_SPEED * (tickTime / 1000.0);
 					break;
-				case down: paddle.yPosition += PADDLE_SPEED
+				case down: rPaddle.yPosition += PADDLE_SPEED
+						* (tickTime / 1000.0); break;
+			}
+			switch (lPaddle.getMove()) {
+				case up: lPaddle.yPosition -= PADDLE_SPEED * (tickTime / 1000.0);
+					break;
+				case down: lPaddle.yPosition += PADDLE_SPEED
 						* (tickTime / 1000.0); break;
 			}
 			
@@ -172,22 +196,41 @@ public class Pong extends Thread implements MouseMotionListener {
 			ball.position.y += ball.velocity.y * (tickTime / 1000.0);
 			
 			//If the paddle hit the edge of the arena, stop it
-			if (paddle.yPosition + paddle.length / 2 > ARENA_HEIGHT) {
-				paddle.yPosition = ARENA_WIDTH - paddle.length / 2;
-			} else if (paddle.yPosition - paddle.length / 2 < 0) {
-				paddle.yPosition = 0 + paddle.length / 2;
+			if (rPaddle.yPosition + rPaddle.length / 2 > ARENA_HEIGHT) {
+				rPaddle.yPosition = ARENA_WIDTH - rPaddle.length / 2;
+			} else if (rPaddle.yPosition - rPaddle.length / 2 < 0) {
+				rPaddle.yPosition = 0 + rPaddle.length / 2;
+			}
+			if (lPaddle.yPosition + lPaddle.length / 2 > ARENA_HEIGHT) {
+				lPaddle.yPosition = ARENA_WIDTH - lPaddle.length / 2;
+			} else if (lPaddle.yPosition - lPaddle.length / 2 < 0) {
+				lPaddle.yPosition = 0 + lPaddle.length / 2;
 			}
 			
 			//If the ball is behind the paddle's location
-			if (ball.position.x < paddle.xPosition) {
+			if (ball.position.x < lPaddle.xPosition) {
 				//If the ball hit the paddle
-				if (ball.position.y > paddle.yPosition - paddle.length / 2
-				 && ball.position.y < paddle.yPosition + paddle.length / 2) {
-					paddle.bounce(ball);
-					bounces++;
+				if (ball.position.y > lPaddle.yPosition - lPaddle.length / 2
+				 && ball.position.y < lPaddle.yPosition + lPaddle.length / 2) {
+					lPaddle.bounce(ball);
+					lBounces++;
 				} else {
 					respawn(ball);
-					misses++;
+					lStreak = (lBounces > lStreak) ? lBounces : lStreak;
+					lBounces = 0;
+					lMisses++;
+				}
+			}
+			if (ball.position.x > rPaddle.xPosition) {
+				//If the ball hit the paddle
+				if (ball.position.y > rPaddle.yPosition - rPaddle.length / 2
+				 && ball.position.y < rPaddle.yPosition + rPaddle.length / 2) {
+					rPaddle.bounce(ball);
+					rBounces++;
+				} else {
+					respawn(ball);
+					rStreak = (rBounces > rStreak) ? rBounces : rStreak;
+					rMisses++;
 				}
 			}
 			
@@ -212,7 +255,7 @@ public class Pong extends Thread implements MouseMotionListener {
 				renderGame(backgroundGraphics);
 				bg.drawImage(background, 0, 0, null);
 				bg.dispose();
-			}while(!updateScreen());
+			}while(!updateScreen());//keep trying to push to screen if it didn't work
 
 			//FPS limiting
 			long renderTime = (System.nanoTime() - renderStart) / 1000000;
@@ -235,18 +278,24 @@ public class Pong extends Thread implements MouseMotionListener {
 	}
 	
 	public void renderGame(Graphics2D g) {
+		//draw background
 		g.setColor(Color.BLACK);
 		g.fillRect(0, 0, frame.getWidth(), frame.getHeight());
 
+		//draw paddles and ball
 		g.setColor(Color.WHITE);
-		paddle.draw(g);
+		rPaddle.draw(g);
+		lPaddle.draw(g);
 		ball.draw(g);
 		
+		//draw score
 		g.setFont(new Font("Arial", Font.PLAIN, 10));
 		g.setColor(new Color(113, 159, 235));
-		g.drawString("Bounces: " + bounces, 20, 10);
+		g.drawString(""+lStreak, 20, 10);
+		g.drawString(""+rStreak, ARENA_WIDTH-20, 10);
 		g.setColor(new Color(214, 88, 88));
-		g.drawString("Misses: " + misses, 20, 20);
+		g.drawString(""+lMisses, 20, 20);
+		g.drawString(""+rMisses, ARENA_WIDTH-20, 20);
 	}
 
 	public void mouseDragged(MouseEvent e) {
