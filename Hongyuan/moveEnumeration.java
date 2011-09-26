@@ -1,3 +1,1 @@
-public enum moveEnumeration{
-    moveUp, stay, moveDown
-};
+/*See the move class*/
