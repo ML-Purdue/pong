@@ -10,6 +10,7 @@ public class HumanPaddle extends Paddle {
         this.length = length;
     }
 
+    // When the HumanPaddle is on the right side, its x needs to be changed.
     public HumanPaddle(ControlState controls, int length, int x, int y) {
         this.controls = controls;
         xPosition = x;
