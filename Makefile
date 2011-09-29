@@ -23,10 +23,7 @@ Key: Key.java
 KeyReleaser: Key KeyReleaser.java
 	javac KeyReleaser.java
 
-Controls: Controls.java
-	javac Controls.java
-
-ControlState: Controls KeyReleaser ControlState.java
+ControlState: KeyReleaser ControlState.java
 	javac ControlState.java
 
 clean:
