@@ -83,6 +83,61 @@ public class Pong extends Thread implements MouseMotionListener {
   } while(strategy == null);
 
  }
+ /*
+ public Pong() {
+     setupGraphics();
+     
+     ball = new Ball(BALL_SPEED, BALL_RADIUS);
+     lPaddle = new SimpleCPUPaddle(ball, PADDLE_LENGTH, 10, ARENA_HEIGHT);
+     rPaddle = new SimpleCPUPaddle(ball, PADDLE_LENGTH, ARENA_WIDTH-10, ARENA_HEIGHT);
+     
+     random = new Random();
+     controls = new ControlState();
+     controls.addControl(Controls.exit, KeyEvent.VK_ESCAPE);
+     controls.addControl(Controls.movePaddleUp, KeyEvent.VK_UP);
+     controls.addControl(Controls.movePaddleDown, KeyEvent.VK_DOWN);
+     
+     tickTime = (long)(1.0 / 30 * 1000);
+     
+     //Allow key presses to work both if the frame and canvas are in focus
+     canvas.addKeyListener(controls);
+     frame.addKeyListener(controls);
+     
+     canvas.addMouseMotionListener(this);
+     
+     isRunning = true;
+     respawn(ball);
+     start();
+ }
+ 
+ public Pong(Paddle left, Paddle right){
+     setupGraphics();
+     
+     ball = new Ball(BALL_SPEED, BALL_RADIUS);
+     rPaddle = right;
+     lPaddle = left;
+     
+     random = new Random();
+     controls = new ControlState();
+     controls.addControl(Controls.exit, KeyEvent.VK_ESCAPE);
+     controls.addControl(Controls.movePaddleUp, KeyEvent.VK_UP);
+     controls.addControl(Controls.movePaddleDown, KeyEvent.VK_DOWN);
+     
+     //limit speed to 30 fps
+     tickTime = (long)(1.0 / 30 * 1000);
+     
+     //Allow key presses to work both if the frame and canvas are in focus
+     canvas.addKeyListener(controls);
+     frame.addKeyListener(controls);
+     
+     canvas.addMouseMotionListener(this);
+     
+     isRunning = true;
+     respawn(ball);
+     start();
+ }*/
+ 
+ //common codes of constructor, except for start()
  private void setupPong(){
   setupGraphics();
   ball = new Ball(BALL_SPEED, BALL_RADIUS);
@@ -103,31 +158,38 @@ public class Pong extends Thread implements MouseMotionListener {
   isRunning = true;
   respawn(ball);
  }
+ //Adapted from Pong()
  public Pong() {
   setupPong();
   
   lPaddle = new SimpleCPUPaddle(ball, PADDLE_LENGTH, 10, ARENA_HEIGHT);
-  rPaddle = new SimpleCPUPaddle(ball, PADDLE_LENGTH, ARENA_WIDTH-10, ARENA_HEIGHT);
+  rPaddle = new WallPaddle(ball, ARENA_HEIGHT, ARENA_WIDTH-10, ARENA_HEIGHT);
   
   start();
  }
+ //Adapted from Pong(Paddle left, Paddle right)
  public Pong(String leftName, String rightName, String path){
    setupPong();
-   
+
    //Select paddles by names
    String left = leftName.toLowerCase();
    String right = rightName.toLowerCase();
-   if ( left.equals("humanpaddle") )
-     lPaddle = new HumanPaddle(controls, PADDLE_LENGTH);
-   else if ( left.equals("simplecpupaddle") )
+
+   if ( left.equals("human") )
+     lPaddle = new HumanPaddle(controls, PADDLE_LENGTH, 10, ARENA_HEIGHT);
+   else if ( left.equals("cpu") )
      lPaddle = new SimpleCPUPaddle(ball, PADDLE_LENGTH, 10, ARENA_HEIGHT);
+   else if ( left.equals("wall") )
+     lPaddle = new WallPaddle(ball, ARENA_HEIGHT, 10, ARENA_HEIGHT);
    else
      throw new Error("Error: Valid paddle name " + leftName);
-       
-   if ( right.equals("humanpaddle") )
-     rPaddle = new HumanPaddle(controls, PADDLE_LENGTH);
-   else if ( right.equals("simplecpupaddle") )
+   
+   if ( right.equals("human") )
+     rPaddle = new HumanPaddle(controls, PADDLE_LENGTH, ARENA_WIDTH - 10, ARENA_HEIGHT);
+   else if ( right.equals("cpu") )
      rPaddle = new SimpleCPUPaddle(ball, PADDLE_LENGTH, ARENA_WIDTH - 10, ARENA_HEIGHT);
+   else if ( right.equals("wall") )
+     rPaddle = new WallPaddle(ball, ARENA_HEIGHT, ARENA_WIDTH - 10, ARENA_HEIGHT);
    else 
      throw new Error("Error: Valid paddle name " + rightName);
 
