@@ -4,15 +4,17 @@ public class Main {
         String p, lPaddle = "" , rPaddle = "", path = "";
         
         if ( parameters.length == 0) {
-            Pong pong = new Pong();
+            Pong pong = new Pong("cpu", "wall", "");
             return ;
         }
         if ( parameters.length == 1 && parameters[0].equals("-?") ) {
-            System.out.println("Pong Command Help");
-            System.out.println("1) To select paddles\n"
-                                   + "  -paddles [leftPaddle] [rightPaddle]");
-            System.out.println("2) To save the game to a file\n"
-                                   + "  -s [path]");
+            System.out.println("Usage: java Pong [OPTIONS]");
+            System.out.println("-human: Create a human-controlled paddle");
+            System.out.println("-cpu: Create a simple algorithmic paddle");
+            System.out.println("-wall: Create a wall");
+            System.out.println("-ai: Create an AI-controlled paddle");
+            System.out.println("-paddles [leftPaddle] [rightPaddle]: Select paddles");
+            System.out.println("-s [path]: Save the game to a file\n");
             return ;
         }
         
@@ -26,6 +28,12 @@ public class Main {
             } else if ( i + 2 <= parameters.length && p.equals("-s") ) {
                 path = parameters[ i + 1 ];
                 i += 2;
+            } else if ( lPaddle.equals("") ) {
+                lPaddle = p.substring(1);
+                i++;
+            } else if ( rPaddle.equals("") ) {
+                rPaddle = p.substring(1);
+                i++;
             } else {
                 System.out.println("Error: Parameter " + parameters[i] + " is ignored.");
                 i++;
@@ -35,7 +43,7 @@ public class Main {
         try{
             Pong pong = new Pong(lPaddle, rPaddle, path);
         } catch(Error e) {
-            System.out.println(e.getMessage());
+            System.err.println(e.getMessage());
             System.exit(0);
         }
     }
