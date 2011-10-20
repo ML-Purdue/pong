@@ -68,10 +68,8 @@ public class GeneticPaddle extends Paddle {
         for(i=1;i<weights.length;i++){
             bounces[i] = 0;
             for (int j = 0; j < 2; j++) {
-                weights[i][j] = weights[0][j] * ( ( random.nextDouble() - 0.5 )*4 );
-                if (random.nextDouble() < 0.1) {
-                    weights[i][j] *= -weights[i][j]*1.1;
-                }
+                weights[i][j] = weights[0][j] * (1 + 0.1 * 2 * (random.nextDouble() - 0.5)) + 
+                        2 * 2 * (random.nextDouble() - 0.5);
             }
         }
     }

@@ -19,6 +19,7 @@ public class Pong extends JFrame implements ControlState.Listener {
     double maxFPS;
     Stopwatch frameStopwatch;
     Stopwatch gameStopwatch;
+    long msPrecision;
     ControlState controls;
     Random random;
     Paddle paddle;
@@ -28,11 +29,11 @@ public class Pong extends JFrame implements ControlState.Listener {
     int misses;
 
     public enum PaddleType {
-        Human, AI, CPU
+        Human, AI, CPU, Genetic
     }
     
     public Pong() {
-        this(PaddleType.AI, 1/6.0, 10000);
+        this(PaddleType.Genetic, 1/10.0, 10000);
     }
     
     public Pong(PaddleType paddleType, double tickDuration, double speedup) {
@@ -47,13 +48,13 @@ public class Pong extends JFrame implements ControlState.Listener {
         bufferGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
                                         RenderingHints.VALUE_ANTIALIAS_ON);
         setUndecorated(true);
-        setVisible(true);
         
         this.tickDuration = tickDuration;
         this.speedup = speedup;
         maxFPS = 60.0;
         frameStopwatch = new Stopwatch();
         gameStopwatch = new Stopwatch();
+        msPrecision = 16;
         controls = new ControlState(this);
         controls.addListener(this);
         controls.add(ControlState.Function.exit, KeyEvent.VK_ESCAPE);
@@ -66,13 +67,16 @@ public class Pong extends JFrame implements ControlState.Listener {
                 isAI = false;
                 break;
             case AI:
-                paddle = new GeneticPaddle(random,10);
-                //((GeneticPaddle)paddle).printWeights();
+                paddle = new AIPaddle(random);
                 isAI = true;
                 break;
             case CPU:
                 paddle = new CPUPaddle(0.3, 0.2);
                 isAI = false;
+                break;
+            case Genetic:
+                paddle = new GeneticPaddle(random, 10);
+                isAI = true;
                 break;
         }
         ball = new Ball();
@@ -80,36 +84,35 @@ public class Pong extends JFrame implements ControlState.Listener {
         margin = 30;
         hits = 0;
         misses = 0;
+
+        setVisible(true);
+        
         run();
     }
     
     private void run() {
-        while(true)update();
-        /*
-        frameStopwatch.start();
-        gameStopwatch.start();
-        double secondsPerFrame = 1.0 / maxFPS;
-        double secondsPerUpdate = tickDuration / speedup;
-        double frame, update=0;
+        long millisecondsPerUpdate = (long)(tickDuration / speedup * 1000);
+        long nextUpdate = System.currentTimeMillis();
+        long millisecondsPerDraw = (long)(1000 / maxFPS);
+        long nextDraw = System.currentTimeMillis();
+        
         while (true) {
-            frame = secondsPerFrame - frameStopwatch.getElapsedSeconds();
-            update = secondsPerUpdate - gameStopwatch.getElapsedSeconds();
-            
-            if (frame < 0) {
-                frameStopwatch.restart();
-                repaint();
-            }
-            
-            if (update < 0) {
-                gameStopwatch.restart();
+            long deltaUpdate = nextUpdate - System.currentTimeMillis();
+            if (deltaUpdate <= 0) {
                 update();
-            }
-            
-            if (update > 0 && frame > 0) {
-                try { Thread.sleep((long)(update * 1000)); }
+                nextUpdate += millisecondsPerUpdate;
+            } else if (deltaUpdate >= msPrecision) {
+                try { Thread.sleep(deltaUpdate); }
                 catch (InterruptedException e) { e.printStackTrace(); }
             }
-        }*/
+
+            long deltaDraw = nextDraw - System.currentTimeMillis();
+            if (deltaDraw <= 0) {
+                repaint();
+                nextDraw += millisecondsPerDraw;
+                nextDraw = Math.max(nextDraw, nextUpdate);
+            }
+        }
     }
     
     private void update() {

@@ -1,45 +1,52 @@
 public class Stopwatch {
     long startTime;
     long endTime;
-    long buildup;
     boolean isRunning;
     
     public Stopwatch() {
-        startTime = 0;
+        this(false);
+    }
+    
+    public Stopwatch(boolean startImmediately) {
+        startTime = startImmediately ? System.nanoTime() : 0;
         endTime = 0;
-        buildup = 0;
-        isRunning = false;
+        isRunning = startImmediately;
     }
     
     public void start() {
-        startTime = System.currentTimeMillis();
+        if (isRunning) return;
+        
+        startTime = System.nanoTime() - (endTime - startTime);
         isRunning = true;
     }
     
-    public void stop() {
-        if (isRunning) {
-            endTime = System.currentTimeMillis();
-            isRunning = false;
-            buildup += endTime - startTime;
-        }
+    public void pause() {
+        if (!isRunning) return;
+        
+        endTime = System.nanoTime();
+        isRunning = false;
     }
     
     public void reset() {
         startTime = 0;
         endTime = 0;
-        buildup = 0;
         isRunning = false;
     }
     
     public void restart() {
-        reset(); start();
+        startTime = System.nanoTime();
+        isRunning = true;
     }
     
-    public long getElapsedMilliseconds() {
-        return buildup + (System.currentTimeMillis() - startTime);
+    public long nanoseconds() {
+        return isRunning ? System.nanoTime() - startTime : endTime - startTime;
     }
     
-    public double getElapsedSeconds() {
-        return getElapsedMilliseconds() / 1000.0;
+    public long milliseconds() {
+        return nanoseconds() / 1000000;
+    }
+    
+    public double seconds() {
+        return nanoseconds() / 1000000000.0;
     }
 }
