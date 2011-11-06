@@ -13,7 +13,7 @@ public class ControlState implements KeyListener {
 	private int releaseDelay;
 	
 	public enum Function {
-	    moveUp, moveDown, exit
+	    moveUp, moveDown, exit, speedUp, slowDown
 	}
 	
 	public class Control implements ActionListener {

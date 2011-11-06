@@ -60,6 +60,8 @@ public class Pong extends JFrame implements ControlState.Listener {
         controls.add(ControlState.Function.exit, KeyEvent.VK_ESCAPE);
         controls.add(ControlState.Function.moveUp, KeyEvent.VK_UP);
         controls.add(ControlState.Function.moveDown, KeyEvent.VK_DOWN);
+        controls.add(ControlState.Function.speedUp, KeyEvent.VK_RIGHT);
+        controls.add(ControlState.Function.slowDown, KeyEvent.VK_LEFT);
         random = new Random();
         switch (paddleType) {
             case Human:
@@ -98,6 +100,7 @@ public class Pong extends JFrame implements ControlState.Listener {
         
         while (true) {
             long deltaUpdate = nextUpdate - System.currentTimeMillis();
+            millisecondsPerUpdate = (long)(tickDuration / speedup * 1000);
             if (deltaUpdate <= 0) {
                 update();
                 nextUpdate += millisecondsPerUpdate;
@@ -202,6 +205,14 @@ public class Pong extends JFrame implements ControlState.Listener {
     public void controlPressed(ControlState.Control control) {
         if (control.function == ControlState.Function.exit) {
             System.exit(0);
+        }
+
+        if(control.function == (ControlState.Function.speedUp)){
+            speedup *= 2;
+        }
+        
+        if(control.function == (ControlState.Function.slowDown)){
+            speedup /= 2;
         }
     }
     
