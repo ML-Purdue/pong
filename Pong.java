@@ -62,6 +62,8 @@ public class Pong extends JFrame implements ControlState.Listener {
         controls.add(ControlState.Function.moveDown, KeyEvent.VK_DOWN);
         controls.add(ControlState.Function.speedUp, KeyEvent.VK_RIGHT);
         controls.add(ControlState.Function.slowDown, KeyEvent.VK_LEFT);
+        controls.add(ControlState.Function.tickUp, KeyEvent.VK_T);
+        controls.add(ControlState.Function.tickDown, KeyEvent.VK_Y);
         random = new Random();
         switch (paddleType) {
             case Human:
@@ -93,23 +95,23 @@ public class Pong extends JFrame implements ControlState.Listener {
     }
     
     private void run() {
-        long millisecondsPerUpdate = (long)(tickDuration / speedup * 1000);
-        long nextUpdate = System.currentTimeMillis();
-        long millisecondsPerDraw = (long)(1000 / maxFPS);
-        long nextDraw = System.currentTimeMillis();
+        double millisecondsPerUpdate = (double)(tickDuration / speedup * 1000);
+        double nextUpdate = System.currentTimeMillis();
+        double millisecondsPerDraw = (double)(1000 / maxFPS);
+        double nextDraw = System.currentTimeMillis();
         
         while (true) {
-            long deltaUpdate = nextUpdate - System.currentTimeMillis();
-            millisecondsPerUpdate = (long)(tickDuration / speedup * 1000);
+            double deltaUpdate = nextUpdate - System.currentTimeMillis();
+            millisecondsPerUpdate = (double)(tickDuration / speedup * 1000);
             if (deltaUpdate <= 0) {
                 update();
                 nextUpdate += millisecondsPerUpdate;
             } else if (deltaUpdate >= msPrecision) {
-                try { Thread.sleep(deltaUpdate); }
+                try { Thread.sleep((long)deltaUpdate); }
                 catch (InterruptedException e) { e.printStackTrace(); }
             }
 
-            long deltaDraw = nextDraw - System.currentTimeMillis();
+            double deltaDraw = nextDraw - System.currentTimeMillis();
             if (deltaDraw <= 0) {
                 repaint();
                 nextDraw += millisecondsPerDraw;
@@ -177,6 +179,9 @@ public class Pong extends JFrame implements ControlState.Listener {
                                               100 * (double)hits / (hits + misses) : 0.0) + "%";
         bufferGraphics.drawString("Hits/Misses: " + 
                                   hits + "/" + misses + " " + percentage, margin + 5, 20);
+
+        bufferGraphics.drawString("Tick:" + tickDuration + " Speedup: " + speedup
+                                  , margin + 5, arenaSize + (2*margin) - 10);
         
         // outline
         bufferGraphics.setColor(Color.BLACK);
@@ -213,6 +218,14 @@ public class Pong extends JFrame implements ControlState.Listener {
         
         if(control.function == (ControlState.Function.slowDown)){
             speedup /= 2;
+        }
+
+        if(control.function == (ControlState.Function.tickUp)){
+            tickDuration *= 2;
+        }
+
+        if(control.function == (ControlState.Function.tickDown)){
+            tickDuration /= 2;
         }
     }
     
