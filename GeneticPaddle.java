@@ -8,14 +8,17 @@ public class GeneticPaddle extends Paddle {
 
     private class DNA{
         public double[] weights;
-        public double bounces;
-        public long miss;
+        public long bounces;
+        public long misses;
+        public double hitPercentage;
+        
         public DNA(){
             weights = new double[2];
             for(int i = 0; i < weights.length; i++)
                 weights[i] = random.nextDouble() - 1;
             bounces = 0;
-            miss = 0;
+            misses = 0;
+            hitPercentage = 0;
         }
         
         public void printWeights() {
@@ -48,33 +51,42 @@ public class GeneticPaddle extends Paddle {
     }
     
     public void sendPain() {
-        dna[currentDNA].miss++;
-        if ( dna[currentDNA].bounces < 10 ) 
-            return;
-
-        dna[currentDNA].bounces/=(dna[currentDNA].bounces+dna[currentDNA].miss);
-        dna[currentDNA].miss = 0;
-        currentDNA++;
-        if(currentDNA < dna.length) return;
-        currentDNA = 1;
-        int best = 0, i;
-        for(i=1;i<dna.length;i++)
-            if (dna[best].bounces<dna[i].bounces) best=i;
-        if (best!=0){
-            System.out.print("Best: " + dna[best].bounces+" ");
-            for(i=0;i<2;i++){
-                dna[0].weights[i] = dna[best].weights[i];
-                System.out.print(dna[0].weights[i] + " ");
-            }
-            dna[0].bounces = dna[best].bounces;
-            System.out.println("");
-        }
+        // missed
+        dna[currentDNA].misses++;
         
-        for(i=1;i<dna.length;i++){
-            dna[i].bounces = 0;
+        // each dna plays for 100 bounces
+        if ( dna[currentDNA].bounces < 100 ) 
+            return;
+        
+        // record hit percentage and reset misses and bounces 
+        dna[currentDNA].hitPercentage = (double)dna[currentDNA].bounces / (dna[currentDNA].bounces+dna[currentDNA].misses);
+        dna[currentDNA].misses = 0;
+        dna[currentDNA].bounces = 0;
+        
+        // play through each dna
+        if(++currentDNA < dna.length) return;
+        
+        // reset the current dna
+        currentDNA = 0;
+        
+        // find the best dna
+        int best = 0;
+        for(int i = 0; i < dna.length; i++)
+            if (dna[best].hitPercentage < dna[i].hitPercentage) best=i;
+        
+        // print its hit percentage and weights
+        System.out.format("%.2f ", dna[best].hitPercentage);
+        dna[best].printWeights();
+        
+        // store the best dna in the first element
+        for(int i = 0; i < 2; i++)
+            dna[0].weights[i] = dna[best].weights[i];
+        
+        // mutate the other dna based on the best one
+        for(int i = 1; i < dna.length; i++){
             for (int j = 0; j < 2; j++) {
                 dna[i].weights[j] = dna[0].weights[j] * (1 + 0.1 * 2 * (random.nextDouble() - 0.5)) + 
-                        2 * 2 * (random.nextDouble() - 0.5);
+                        0.2 * 2 * (random.nextDouble() - 0.5);
             }
         }
     }
