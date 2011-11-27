@@ -64,7 +64,7 @@ public class Pong extends JFrame implements ControlState.Listener {
         controls.add(ControlState.Function.slowDown, KeyEvent.VK_LEFT);
         controls.add(ControlState.Function.tickUp, KeyEvent.VK_T);
         controls.add(ControlState.Function.tickDown, KeyEvent.VK_Y);
-        random = new Random();
+        random = new Random(100);
         switch (paddleType) {
             case Human:
                 paddle = new HumanPaddle(controls);

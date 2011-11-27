@@ -11,7 +11,7 @@ public class Main {
         //Set default parameters
         Pong.PaddleType type = Pong.PaddleType.Human;
         double tickDuration = 1/10.0;
-        double speedup = 10000;
+        double speedup = 5;
 
         //Parse parameters
         for(int i = 0; i < argv.length; i++){

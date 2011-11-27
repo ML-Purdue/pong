@@ -54,8 +54,8 @@ public class GeneticPaddle extends Paddle {
         // missed
         dna[currentDNA].misses++;
         
-        // each dna plays for 100 bounces
-        if ( dna[currentDNA].bounces < 100 ) 
+        // each dna plays for 30 bounces
+        if ( dna[currentDNA].bounces < 30 ) 
             return;
         
         // record hit percentage and reset misses and bounces 
@@ -86,7 +86,7 @@ public class GeneticPaddle extends Paddle {
         for(int i = 1; i < dna.length; i++){
             for (int j = 0; j < 2; j++) {
                 dna[i].weights[j] = dna[0].weights[j] * (1 + 0.1 * 2 * (random.nextDouble() - 0.5)) + 
-                        0.2 * 2 * (random.nextDouble() - 0.5);
+                        1.0 * 2 * (random.nextDouble() - 0.5);
             }
         }
     }
