@@ -31,7 +31,7 @@ public class AIPaddle extends Paddle {
         double r=0;
         for(int i=0;i<inputs.length;i++){
             for(int j=0;j<3;j++){
-                //r += dna[i*3]*Math.pow(inputs[i],dna[i*3+1])+dna[i*3+2];
+                r += dna[i*3]*Math.pow(inputs[i],dna[i*3+1])+dna[i*3+2];
             }
         }
         return r;
